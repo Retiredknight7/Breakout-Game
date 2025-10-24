@@ -19,7 +19,7 @@ module vga_clk_tb(
     
     vga_clk uut(.clk(clk_tb), .reset(reset_tb), .clk_out(clk_out_tb));
     
-    always #10 clk_tb = ~clk_tb;
+    always #5 clk_tb = ~clk_tb;
     
     initial begin
         clk_tb = 0; reset_tb = 1;
