@@ -12,16 +12,30 @@
 
 
 module vga_clk(
-    input clk,
+    input clk, reset,
     output reg clk_out
     );
     
-    reg [1:0] counter = 2'b00;
+    reg [31:0] count;
+    localparam DIVISOR = 2;
     
-    clk_out = 0;
+    always @ (posedge(clk), posedge(reset))
+    begin
+        if (reset == 1'b1)
+            count <= 32'b0;
+        else if (count == DIVISOR - 1)
+            count <= 32'b0;
+        else
+            count <= count + 1;
+    end
     
-    always @(posedge clk) begin
-        if (counter == 2'b11) clk_out = ~clk_out;
-        counter = counter + 1;
+    always @ (posedge(clk), posedge(reset))
+    begin
+        if (reset == 1'b1)
+            clk_out <= 1'b0;
+        else if (count == DIVISOR - 1)
+            clk_out <= ~clk_out;
+        else
+            clk_out <= clk_out;
     end
 endmodule
