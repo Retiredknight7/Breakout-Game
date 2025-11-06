@@ -22,3 +22,4 @@
 *.Xil/
 *.runs/
 *.srcs/constrs_1/imports/
+vivado_pid*.str
