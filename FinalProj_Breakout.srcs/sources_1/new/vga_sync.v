@@ -48,7 +48,7 @@ module vga_sync(
         end
     end
     
-    // active video flag (useful for your pixel generator to blank RGB)
+    // active video flag (useful for pixel generator to blank RGB)
     assign video_on = (pixel_x < ACTIVE_HOR) && (pixel_y < ACTIVE_VERT);
 
     // Frequency generation
