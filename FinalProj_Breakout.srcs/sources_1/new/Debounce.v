@@ -24,7 +24,7 @@
 module Debounce #(parameter integer N = 18) (
     input  wire clk,
     input  wire noisy,
-    output reg  clean
+    output reg  clean = 0
 );
     reg [N-1:0] cnt = 0;
     reg sync0=0, sync1=0;
@@ -51,7 +51,13 @@ module EdgeOneShot(
     input  wire din,
     output wire pulse
 );
-    reg d1=0;
-    always @(posedge clk) d1 <= din;
-    assign pulse = din & ~d1;
+  reg d1 = 1'b0;      // previous din
+  reg pulse_r = 1'b0; // registered pulse
+
+  always @(posedge clk) begin
+    pulse_r <= din & ~d1; // goes high for 1 cycle on rising edge
+    d1      <= din;       // capture current din for next cycle
+  end
+
+  assign pulse = pulse_r;
 endmodule

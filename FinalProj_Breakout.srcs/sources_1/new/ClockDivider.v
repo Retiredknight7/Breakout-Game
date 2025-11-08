@@ -22,10 +22,13 @@
 
 module ClockDivider #(parameter integer DIVIDE = 12500) (
     input  wire clk,
-    output reg  tick
+    output reg  tick   // initialize tick to 0
 );
     localparam integer W = $clog2(DIVIDE);
     reg [W-1:0] cnt = 0;
+    
+    // give tick a defined power-up value for sim & synth
+    initial tick = 1'b0;
 
     always @(posedge clk) begin
         if (cnt == DIVIDE-1) begin
