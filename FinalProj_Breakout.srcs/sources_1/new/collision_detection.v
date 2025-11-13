@@ -1,22 +1,9 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 11/07/2025 03:43:20 PM
-// Design Name: 
+// Engineer: Paris Talebi
 // Module Name: collision_detection
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
+// Description: Detects collisions between the ball, paddle, and bricks,
+//              and signals when the ball is missed (goes beyond paddle)
 //////////////////////////////////////////////////////////////////////////////////
 
 module collision_detection(
@@ -24,19 +11,31 @@ module collision_detection(
     input [9:0] ball_y,
     input [9:0] paddle_x,
     input [9:0] paddle_y,
-    output collision_left,
-    output collision_right,
-    output collision_top,
+    input [9:0] brick_x,
+    input [9:0] brick_y,
+    input brick_active,        // 1 if brick still on screen
+    input [9:0] screen_bottom, // e.g., 480 for 640x480 VGA
     output collision_paddle,
-    output collision_brick
+    output collision_brick,
+    output miss_ball
 );
 
-    assign collision_left  = (ball_x <= 0);
-    assign collision_right = (ball_x >= 639);
-    assign collision_top   = (ball_y <= 0);
-    assign collision_paddle = (ball_y >= paddle_y - 8) && 
-                              (ball_x >= paddle_x) && 
+    // --- Paddle collision detection ---
+    // Ball hits paddle if it's just above paddle_y and within paddle width
+    assign collision_paddle = (ball_y >= paddle_y - 8) &&
+                              (ball_x >= paddle_x) &&
                               (ball_x <= paddle_x + 64);
-    assign collision_brick = 1'b0; // placeholder - connect to brick array later
+
+    // --- Brick collision detection ---
+    // Example: brick is 64x16 pixels
+    assign collision_brick = brick_active &&
+                             (ball_x >= brick_x) && 
+                             (ball_x <= brick_x + 64) &&
+                             (ball_y >= brick_y) && 
+                             (ball_y <= brick_y + 16);
+
+    // --- Miss ball detection ---
+    // If ball goes below the paddle (off-screen)
+    assign miss_ball = (ball_y > screen_bottom);
 
 endmodule
