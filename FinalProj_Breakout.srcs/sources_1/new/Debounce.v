@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
-// Engineer: 
+// Engineer: Brayan Alejandro Fuentes Vargas
 // 
 // Create Date: 10/22/2025 
 // Design Name: 
@@ -20,44 +20,30 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-// Simple synchronous debounce: N controls ~filter length (2^N / fclk).
+// Simple synchronous debounce: N controls hold time (~2^N / fclk)
 module Debounce #(parameter integer N = 18) (
     input  wire clk,
     input  wire noisy,
-    output reg  clean = 0
+    output reg  clean
 );
-    reg [N-1:0] cnt = 0;
-    reg sync0=0, sync1=0;
+    reg        sync0, sync1;
+    reg [N-1:0] cnt;
 
     always @(posedge clk) begin
-        // 2FF sync
+        // 2FF synchronizer
         sync0 <= noisy;
         sync1 <= sync0;
 
+        // counter runs only while input != clean
         if (clean == sync1) begin
-            cnt <= 0;
+            cnt <= {N{1'b0}};
         end else begin
-            cnt <= cnt + 1;
+            cnt <= cnt + {{(N-1){1'b0}}, 1'b1};
             if (&cnt) begin
-                clean <= sync1;
+                clean <= sync1;      // accept new state after stable period
+                cnt   <= {N{1'b0}};
             end
         end
     end
 endmodule
 
-// Rising-edge one-shot
-module EdgeOneShot(
-    input  wire clk,
-    input  wire din,
-    output wire pulse
-);
-  reg d1 = 1'b0;      // previous din
-  reg pulse_r = 1'b0; // registered pulse
-
-  always @(posedge clk) begin
-    pulse_r <= din & ~d1; // goes high for 1 cycle on rising edge
-    d1      <= din;       // capture current din for next cycle
-  end
-
-  assign pulse = pulse_r;
-endmodule

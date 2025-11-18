@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
-// Engineer: 
+// Engineer: Brayan Alejandro Fuentes Vargas
 // 
 // Create Date: : 04/12/2023 010:19:11 AM
 // Design Name: 
