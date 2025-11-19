@@ -129,8 +129,13 @@ module breakout_top(
     // 4) Collisions
     // =================================================================
     wire collision_left, collision_right, collision_top;
-    wire collision_paddle, collision_brick;
+    wire miss_ball;
+    wire collision_paddle;
+    wire collision_brick_leftright, collision_brick_topbottom;
+    wire [6:0] hit_idx;
+    wire [76:0] active_bricks;
 
+<<<<<<< HEAD
     collision_detection #(.H_VISIBLE(640), .V_VISIBLE(480),
     .BALL_R(8), .PADDLE_W(80), .BRICK_W(64), .BRICK_H(16)
      ) coll_inst (
@@ -138,23 +143,46 @@ module breakout_top(
     .ball_y           (pixel_ball_y),
     .paddle_x         (pixel_paddle_x),
     .paddle_y         (paddle_y),
+=======
+    // --- Paddle Y fixed position ---
+    wire [9:0] paddle_y = 432;  // near bottom of the screen
+>>>>>>> 03d97bf (modified ball_motion and collision_detection to integrate with vga_controller; needs to be tested)
 
     // no active single-brick wired yet; safe tie-offs
     .brick_x          (10'd0),
     .brick_y          (10'd0),
     .brick_active     (1'b0),
 
+<<<<<<< HEAD
     .collision_left   (collision_left),
     .collision_right  (collision_right),
     .collision_top    (collision_top),
     .collision_paddle (collision_paddle),
     .collision_brick  (collision_brick)
      );
+=======
+    // --- Instantiate Collision Detection ---
+    collision_detection coll_inst (
+        .ball_x(ball_x),
+        .ball_y(ball_y),
+        .paddle_x(paddle_x),
+        .paddle_y(paddle_y),
+        .collision_left(collision_left),
+        .collision_right(collision_right),
+        .collision_top(collision_top),
+        .collision_paddle(collision_paddle),
+        .collision_brick_leftright(collision_brick_leftright),
+        .collision_brick_topbottom(collision_brick_topbottom),
+        .hit_idx(hit_idx),
+        .miss_ball(miss_ball)
+    );
+>>>>>>> 03d97bf (modified ball_motion and collision_detection to integrate with vga_controller; needs to be tested)
 
     // =================================================================
     // 5) Ball motion (update on frame_tick)
     // =================================================================
     ball_motion ball_inst (
+<<<<<<< HEAD
         .clk              (clk_pix),
         .reset            (rst_pix),
         .collision_left   (collision_left),
@@ -165,6 +193,20 @@ module breakout_top(
         .frame_tick       (frame_tick),   // ensure ball_motion has this port
         .ball_x           (pixel_ball_x),
         .ball_y           (pixel_ball_y)
+=======
+        .clk(clk),
+        .reset(reset),
+        .collision_left(collision_left),
+        .collision_right(collision_right),
+        .collision_top(collision_top),
+        .collision_paddle(collision_paddle),
+        .collision_brick(collision_brick),
+        .collision_brick_leftright(collision_brick_leftright),
+        .collision_brick_topbottom(collision_brick_topbottom),
+        .miss_ball(miss_ball),
+        .ball_x(ball_x),
+        .ball_y(ball_y)
+>>>>>>> 03d97bf (modified ball_motion and collision_detection to integrate with vga_controller; needs to be tested)
     );
 
     // =================================================================
