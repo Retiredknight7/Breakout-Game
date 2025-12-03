@@ -21,8 +21,8 @@
 
 module paddle_control#(
     parameter integer H_VISIBLE    = 640,
-    parameter integer PADDLE_W     = 80,
-    parameter integer PADDLE_Y     = 460,
+    parameter integer PADDLE_W     = 64,//80 //64
+    parameter integer PADDLE_Y     = 432,//460 //432
     parameter integer PADDLE_SPEED = 8
     )(
     input clk,
@@ -39,7 +39,7 @@ module paddle_control#(
     input  wire        move_left_step,
     input  wire        move_right_step,
     
-    output reg [9:0] paddle_x,
+    output reg [9:0]   paddle_x,
     output wire [9:0]  paddle_y
 );
     localparam integer X_MIN = 0;

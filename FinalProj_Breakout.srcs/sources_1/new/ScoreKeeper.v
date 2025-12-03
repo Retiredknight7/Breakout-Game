@@ -25,7 +25,102 @@
 // ============================================================
 module ScoreKeeper(
     input  wire clk100mhz,     // 100 MHz board clock
+    input  wire HIT,           // 1-cycle pulse from breakout_top
+    input  wire [7:0] POINTS,  // score to add per hit
+    input  wire RESET,         // pushbutton: clear score to 0
+    output wire [6:0] SEG,     // segments a..g (active-low)
+    output wire [7:0] AN,      // anodes AN0..AN7 (active-low)
+    output wire DP             // decimal point (1 = off)
+);
+
+    // ---------------------------------------------------------
+    // RESET BUTTON LOGIC (keep debounce)
+    // ---------------------------------------------------------
+    wire reset_db;
+    Debounce #(.N(18)) db_reset (.clk(clk100mhz), .noisy(RESET), .clean(reset_db));
+
+    wire reset_pulse;
+    EdgeOneShot os_reset (.clk(clk100mhz), .din(reset_db), .pulse(reset_pulse));
+
+    // ---------------------------------------------------------
+    // HIT PULSE (NO debounce - game HIT is already clean)
+    // ---------------------------------------------------------
+    wire hit_pulse = HIT;  // direct from breakout_top (1 clk pulse)
+
+    // ---------------------------------------------------------
+    // POINT PULSE GENERATOR
+    // Generates POINTS number of pulses for BCD counter
+    // ---------------------------------------------------------
+    reg [7:0] points_left = 0;
+    reg       inc_pulse   = 0;
+
+    always @(posedge clk100mhz) begin
+        inc_pulse <= 1'b0;
+
+        if (reset_pulse) begin
+            points_left <= 8'd0;
+
+        end else if (hit_pulse) begin
+            // Load POINTS for this brick
+            points_left <= POINTS;
+
+        end else if (points_left != 0) begin
+            // Generate one increment pulse each clock
+            inc_pulse   <= 1'b1;
+            points_left <= points_left - 1'b1;
+        end
+    end
+
+    // ---------------------------------------------------------
+    // BCD SCORE COUNTER
+    // ---------------------------------------------------------
+    localparam integer NUM_DIGITS = 8;
+    wire [NUM_DIGITS*4-1:0] bcd_digits;
+
+    BcdCounter #(.NUM_DIGITS(NUM_DIGITS)) score_cnt (
+        .clk     (clk100mhz),
+        .inc     (inc_pulse),    // *** correct source for scoring ***
+        .clr     (reset_pulse),
+        .digits  (bcd_digits)
+    );
+
+    // ---------------------------------------------------------
+    // 7-SEGMENT MULTIPLEXER CLOCK
+    // ---------------------------------------------------------
+    localparam integer PER_DIGIT_REFRESH_HZ = 1000;
+    localparam integer SCAN_HZ = NUM_DIGITS * PER_DIGIT_REFRESH_HZ;
+    localparam integer DIVIDE  = 100_000_000 / SCAN_HZ;
+
+    wire scan_tick;
+    ClockDivider #(.DIVIDE(DIVIDE)) scan_div (
+        .clk  (clk100mhz),
+        .tick (scan_tick)
+    );
+
+    // ---------------------------------------------------------
+    // 7-SEGMENT DISPLAY DRIVER
+    // ---------------------------------------------------------
+    SevenSegMux #(.NUM_DIGITS(NUM_DIGITS)) disp (
+        .clk       (clk100mhz),
+        .scan_tick (scan_tick),
+        .bcd_vec   (bcd_digits),
+        .seg       (SEG),
+        .an        (AN),
+        .dp        (DP)
+    );
+
+endmodule
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ /*module ScoreKeeper(
+    input  wire clk100mhz,     // 100 MHz board clock
     input  wire HIT,           // button or game pulse: increment score by 1
+    input wire [7:0] POINTS,   // score to add per hit
     input  wire RESET,         // button: clear score to 0
     output wire [6:0] SEG,     // segments a..g (active-low for common-anode mapping)
     output wire [7:0] AN,      // anodes AN0..AN7 (active-low select)
@@ -36,24 +131,49 @@ module ScoreKeeper(
 
     // --- Debounce & one-shot the buttons ---
     wire hit_db, reset_db;
-    Debounce #(.N(18)) db_hit   (.clk(clk100mhz), .noisy(HIT),   .clean(hit_db));
+    //Debounce #(.N(18)) db_hit   (.clk(clk100mhz), .noisy(HIT),   .clean(hit_db));
     Debounce #(.N(18)) db_reset (.clk(clk100mhz), .noisy(RESET), .clean(reset_db));
 
     wire hit_pulse, reset_pulse;
-    EdgeOneShot os_hit   (.clk(clk100mhz), .din(hit_db),   .pulse(hit_pulse));
+    //EdgeOneShot os_hit   (.clk(clk100mhz), .din(hit_db),   .pulse(hit_pulse));
     EdgeOneShot os_reset (.clk(clk100mhz), .din(reset_db), .pulse(reset_pulse));
+    wire hit_pulse = HIT;
+    //  --- Point Pulse Generator  --- 
+    // When HIT occurs, generate POINTS pulses
+    reg [7:0] points_left = 0;
+    reg       inc_pulse   = 0;
+
+    always @(posedge clk100mhz) begin
+        inc_pulse <= 0;
+
+        if (reset_pulse) begin
+            points_left <= 0;
+
+        end else if (hit_pulse) begin
+            // load POINTS and begin draining
+            points_left <= POINTS;
+
+        end else if (points_left != 0) begin
+            // generate one INC pulse per clock
+            inc_pulse <= 1;
+            points_left <= points_left - 1;
+        end
+    end
+
+
+
+
 
     // --- Score counter in BCD (one nibble per digit) ---
     wire [NUM_DIGITS*4-1:0] bcd_digits;
     BcdCounter #(.NUM_DIGITS(NUM_DIGITS)) score_cnt (
         .clk     (clk100mhz),
-        .inc     (hit_pulse),
+        .inc     (inc_pulse),    //takes the value for points
         .clr     (reset_pulse),
         .digits  (bcd_digits)
     );
 
     // --- Create a scan tick for the display mux ---
-    // total refresh = NUM_DIGITS * PER_DIGIT_REFRESH_HZ
     localparam integer SCAN_HZ = NUM_DIGITS * PER_DIGIT_REFRESH_HZ;
     localparam integer DIVIDE  = 100_000_000 / SCAN_HZ; // 100MHz / (8*1k) = 12_500
     wire scan_tick;
@@ -70,4 +190,4 @@ module ScoreKeeper(
     );
 
 endmodule
-
+*/
