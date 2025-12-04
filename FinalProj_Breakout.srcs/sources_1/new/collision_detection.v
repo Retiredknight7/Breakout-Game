@@ -42,7 +42,7 @@ module collision_detection(
     localparam BRICK_ROW       = 7;
     localparam BRICK_COL       = 11;
 
-    // Paddle AABB overlap (inclusive/half-open like pixel_gen)
+    // Paddle AABB overlap
     assign collision_paddle =
          ((ball_x + BALL_SIZE) >= paddle_x) &&
          ( ball_x               <  (paddle_x + PADDLE_LENGTH)) &&
@@ -55,7 +55,6 @@ module collision_detection(
     wire [9:0] x1 = ball_x + BALL_SIZE;
     wire [9:0] y1 = ball_y + BALL_SIZE;
 
-    // Loop indices and temps declared OUTSIDE the loop (portable Verilog)
     integer row, col, idx;
     reg     lr_hit, tb_hit, found;
     reg [6:0] idx_reg;
