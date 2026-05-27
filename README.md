@@ -45,4 +45,7 @@ Clone the repository:
 
 Team Contributions
 
-This project was developed collaboratively. All team members contributed to system design, implementation, debugging, and testing. The final result reflects shared effort in architecture planning, logic development, and integration. A special thank you to my teammates Yshi Blanco and Paris Talebi.
+This project was developed collaboratively. All team members contributed to system design, implementation, debugging, and testing. The final result reflects shared effort in architecture planning, logic development, and integration. A special thank you to my teammates 
+
+**Yshi Blanco**
+**Paris Talebi**
