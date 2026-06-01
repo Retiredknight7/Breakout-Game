@@ -48,4 +48,7 @@ Team Contributions
 This project was developed collaboratively. All team members contributed to system design, implementation, debugging, and testing. The final result reflects shared effort in architecture planning, logic development, and integration. A special thank you to my teammates 
 
 **Yshi Blanco**
+yshi.blanco01@student.csulb.edu
+
 **Paris Talebi**
+paris.talebi01@student.csulb.edu
